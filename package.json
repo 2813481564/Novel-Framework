@@ -1,0 +1,23 @@
+{
+  "name": "inkbrush-os",
+  "version": "2.0.0",
+  "description": "InkBrush-OS: A universal, lightweight, Git-friendly scaffolding for AI-collaborative novel writing in IDEs.",
+  "main": ".mobi/scripts/compile.js",
+  "scripts": {
+    "init": "node .mobi/scripts/init.js",
+    "build": "node .mobi/scripts/compile.js",
+    "preview": "node .mobi/scripts/preview.js",
+    "analyze": "node .mobi/scripts/analyze.js"
+  },
+  "keywords": [
+    "ai",
+    "novel",
+    "writing",
+    "scaffolding",
+    "markdown",
+    "copilot",
+    "git"
+  ],
+  "author": "Antigravity & User",
+  "license": "MIT"
+}

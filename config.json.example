@@ -1,0 +1,19 @@
+{
+  "novel_name": "未设定书名",
+  "author": "天码笔仙",
+  "genre": "cultivation",
+  "target_words": 1000000,
+  "tone_style": "文风沉稳，环境描写富有国风画意，打斗硬核细节丰富，人物行事智商在线，拒绝无脑灌水。",
+  "ai_writing_rules": {
+    "words_per_scene_min": 1000,
+    "words_per_scene_max": 1500,
+    "enable_self_check": true,
+    "language": "zh"
+  },
+  "compiler_options": {
+    "output_file": "dist/精编定稿_未设定书名.txt",
+    "include_volume_headers": true,
+    "strip_html_comments": true,
+    "strip_front_matter": true
+  }
+}
