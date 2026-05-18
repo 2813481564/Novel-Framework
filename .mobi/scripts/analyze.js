@@ -30,27 +30,25 @@ function countChineseWords(text) {
 // 解析 Markdown 文件的 Front Matter
 function parseFrontMatter(content) {
   const metadata = {};
-  if (content.startsWith('---')) {
-    const parts = content.split('---');
-    if (parts.length >= 3) {
-      const yaml = parts[1].trim();
-      const lines = yaml.split('\n');
-      lines.forEach(line => {
-        const separatorIndex = line.indexOf(':');
-        if (separatorIndex !== -1) {
-          const key = line.substring(0, separatorIndex).trim();
-          let value = line.substring(separatorIndex + 1).trim();
-          
-          // 解析简易的数组，如 [叶凡, 韩长老]
-          if (value.startsWith('[') && value.endsWith(']')) {
-            value = value.slice(1, -1).split(',').map(item => item.trim().replace(/['"]/g, ''));
-          } else {
-            value = value.replace(/['"]/g, '');
-          }
-          metadata[key] = value;
+  const parts = content.split('---');
+  if (parts.length >= 3) {
+    const yaml = parts[1].trim();
+    const lines = yaml.split('\n');
+    lines.forEach(line => {
+      const separatorIndex = line.indexOf(':');
+      if (separatorIndex !== -1) {
+        const key = line.substring(0, separatorIndex).trim();
+        let value = line.substring(separatorIndex + 1).trim();
+        
+        // 解析简易的数组，如 [叶凡, 韩长老]
+        if (value.startsWith('[') && value.endsWith(']')) {
+          value = value.slice(1, -1).split(',').map(item => item.trim().replace(/['"]/g, ''));
+        } else {
+          value = value.replace(/['"]/g, '');
         }
-      });
-    }
+        metadata[key] = value;
+      }
+    });
   }
   return metadata;
 }

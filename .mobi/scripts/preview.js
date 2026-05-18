@@ -30,27 +30,30 @@ function countChineseWords(text) {
 function parseFrontMatterAndBody(content) {
   const metadata = {};
   let body = content;
-  if (content.startsWith('---')) {
-    const parts = content.split('---');
-    if (parts.length >= 3) {
-      body = parts.slice(2).join('---').trim();
-      const yaml = parts[1].trim();
-      const lines = yaml.split('\n');
-      lines.forEach(line => {
-        const separatorIndex = line.indexOf(':');
-        if (separatorIndex !== -1) {
-          const key = line.substring(0, separatorIndex).trim();
-          let value = line.substring(separatorIndex + 1).trim();
-          
-          if (value.startsWith('[') && value.endsWith(']')) {
-            value = value.slice(1, -1).split(',').map(item => item.trim().replace(/['"]/g, ''));
-          } else {
-            value = value.replace(/['"]/g, '');
-          }
-          metadata[key] = value;
+  
+  // 查找 --- 标记的配对，即使开头有说明信息或标题
+  const parts = content.split('---');
+  if (parts.length >= 3) {
+    // 假设第一组 --- 和第二组 --- 之间是 YAML Front Matter
+    const yaml = parts[1].trim();
+    // 提取正文内容（除去 Front Matter 部分）
+    body = (parts[0] + '\n' + parts.slice(2).join('---')).trim();
+    
+    const lines = yaml.split('\n');
+    lines.forEach(line => {
+      const separatorIndex = line.indexOf(':');
+      if (separatorIndex !== -1) {
+        const key = line.substring(0, separatorIndex).trim();
+        let value = line.substring(separatorIndex + 1).trim();
+        
+        if (value.startsWith('[') && value.endsWith(']')) {
+          value = value.slice(1, -1).split(',').map(item => item.trim().replace(/['"]/g, ''));
+        } else {
+          value = value.replace(/['"]/g, '');
         }
-      });
-    }
+        metadata[key] = value;
+      }
+    });
   }
   return { metadata, body };
 }
@@ -224,6 +227,53 @@ function main() {
   console.log(`\n🎉 可视化看板构建成功！`);
   console.log(`📍 预览看板路径: file:///${output看板Path.replace(/\\/g, '/')}`);
   console.log(`💡 极客贴士：您可在 VS Code 中右键此文件，点击“在 Simple Browser 中打开”直接在 IDE 内部浏览绝美看板！\n`);
+
+  // 10. 自动生成 AI 专用的「角色与伏笔全局名册.md」
+  const rosterFilePath = path.join(rootDir, '设定集', '角色与伏笔全局名册.md');
+  const rosterDir = path.dirname(rosterFilePath);
+  if (!fs.existsSync(rosterDir)) {
+    fs.mkdirSync(rosterDir, { recursive: true });
+  }
+
+  let rosterMd = `# 墨笔-OS 全局角色与伏笔事实名册 🎭\n\n`;
+  rosterMd += `> ⚠️ **此文件由系统自动生成，请勿手动修改**。它会在您运行 \`npm run preview\` 或 \`npm run build\` 时自动更新。\n`;
+  rosterMd += `> **AI 写作助理提示**：在开始执笔新章节前，您必须通读此文件，以获取全书的最新角色状态与伏笔库，确保逻辑一致性，避免凭空捏造新角色。\n\n`;
+
+  // 10a. 角色登场名册
+  rosterMd += `## 👥 全局角色登场名册 (已注册: ${characters.length} 名)\n\n`;
+  if (characters.length > 0) {
+    rosterMd += `| 角色姓名 | 当前境界 | 核心身份 | 所属门派 | 存活状态 | 简介描述 |\n`;
+    rosterMd += `| :--- | :--- | :--- | :--- | :--- | :--- |\n`;
+    characters.forEach(char => {
+      const cleanDesc = (char.description || '暂无详细描述档案')
+        .replace(/\r?\n/g, ' ')
+        .replace(/\|/g, '\\|')
+        .trim();
+      rosterMd += `| **${char.name}** | \`${char.power_level}\` | ${char.identity} | ${char.faction} | ${char.status} | ${cleanDesc} |\n`;
+    });
+  } else {
+    rosterMd += `*（当前设定集/人物卡目录下尚无角色卡）*\n`;
+  }
+  rosterMd += `\n`;
+
+  // 10b. 伏笔线索矩阵
+  rosterMd += `## 🕸️ 全局伏笔与线索矩阵 (已追踪: ${clues.length} 条)\n\n`;
+  if (clues.length > 0) {
+    rosterMd += `| 伏笔ID | 伏笔名称 | 当前状态 | 引入章节 | 描述细节 |\n`;
+    rosterMd += `| :--- | :--- | :--- | :--- | :--- |\n`;
+    clues.forEach(clue => {
+      const cleanDesc = (clue.description || '')
+        .replace(/\r?\n/g, ' ')
+        .replace(/\|/g, '\\|')
+        .trim();
+      rosterMd += `| \`${clue.id}\` | **${clue.name}** | \`${clue.status}\` | 第 ${clue.chapter_introduced} 章 | ${cleanDesc} |\n`;
+    });
+  } else {
+    rosterMd += `*（当前 .mobi/伏笔线索库.json 尚无伏笔数据）*\n`;
+  }
+
+  fs.writeFileSync(rosterFilePath, rosterMd, 'utf-8');
+  console.log(`📝 全局事实名册已自动同步至: file:///${rosterFilePath.replace(/\\/g, '/')}\n`);
 }
 
 main();
